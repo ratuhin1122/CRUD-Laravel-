@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Note;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\View\View;
 use App\Http\Requests\NoteStoreRequest;
 use App\Http\Requests\NoteUpdateRequest;
+use App\Models\Note;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class NoteController extends Controller
 {
@@ -18,11 +17,11 @@ class NoteController extends Controller
     public function index(): View
     {
         $notes = Note::latest()->paginate(5);
-          
+
         return view('notes.index', compact('notes'))
-                    ->with('i', (request()->input('page', 1) - 1) * 5);
+            ->with('i', (request()->input('page', 1) - 1) * 5);
     }
-    
+
     /**
      * Show the form for creating a new resource.
      */
@@ -30,18 +29,26 @@ class NoteController extends Controller
     {
         return view('notes.create');
     }
-    
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(NoteStoreRequest $request): RedirectResponse
-    {   
-        Note::create($request->validated());
-           
+    {
+        $validated = $request->validated();
+        
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('public/images');
+            $validated['image'] = str_replace('public/', '', $path);
+        }
+
+        Note::create($validated);
+
         return redirect()->route('notes.index')
-                         ->with('success', 'Note created successfully.');
+            ->with('success', 'Note created successfully.');
     }
-  
+
     /**
      * Display the specified resource.
      */
@@ -49,7 +56,7 @@ class NoteController extends Controller
     {
         return view('notes.show', compact('note'));
     }
-  
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -57,26 +64,44 @@ class NoteController extends Controller
     {
         return view('notes.edit', compact('note'));
     }
-  
+
     /**
      * Update the specified resource in storage.
      */
     public function update(NoteUpdateRequest $request, Note $note): RedirectResponse
     {
-        $note->update($request->validated());
-          
+        $validated = $request->validated();
+        
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($note->image) {
+                Storage::delete('public/' . $note->image);
+            }
+            
+            $path = $request->file('image')->store('public/images');
+            $validated['image'] = str_replace('public/', '', $path);
+        }
+
+        $note->update($validated);
+
         return redirect()->route('notes.index')
-                        ->with('success', 'Note updated successfully');
+            ->with('success', 'Note updated successfully');
     }
-  
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Note $note): RedirectResponse
     {
+        // Delete associated image if exists
+        if ($note->image) {
+            Storage::delete('public/' . $note->image);
+        }
+        
         $note->delete();
-           
+
         return redirect()->route('notes.index')
-                        ->with('success', 'Note deleted successfully');
+            ->with('success', 'Note deleted successfully');
     }
 }

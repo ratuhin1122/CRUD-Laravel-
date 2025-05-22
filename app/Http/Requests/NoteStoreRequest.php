@@ -25,6 +25,7 @@ class NoteStoreRequest extends FormRequest
             //
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }

@@ -19,8 +19,21 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12 mt-2">
                 <div class="form-group">
-                    <strong>contents:</strong> <br/>
+                    <strong>Content:</strong> <br/>
                     {{ $note->content }}
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 mt-4">
+                <div class="form-group">
+                    <strong>Image:</strong> <br/>
+                    @if($note->image)
+                        <img src="{{ asset('storage/images/' . $note->image) }}" 
+                             alt="Note Image" 
+                             class="img-thumbnail mt-2"
+                             style="max-width: 400px; max-height: 400px;">
+                    @else
+                        <p class="text-muted mt-2">No image available</p>
+                    @endif
                 </div>
             </div>
         </div>

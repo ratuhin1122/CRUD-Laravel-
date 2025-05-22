@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Note extends Model
 {
     //
-    Use HasFactory;
-    protected $fillable = ['title', 'content'];
+    use HasFactory;
+
+    protected $fillable = ['title', 'content', 'image'];
 }
