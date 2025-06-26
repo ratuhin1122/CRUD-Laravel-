@@ -11,9 +11,7 @@ use Illuminate\View\View;
 
 class NoteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index(): View
     {
         $notes = Note::latest()->paginate(5);
